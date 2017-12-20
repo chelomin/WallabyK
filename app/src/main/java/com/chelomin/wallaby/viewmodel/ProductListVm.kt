@@ -4,6 +4,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.arch.persistence.room.Room
 import android.os.AsyncTask
+import android.os.Handler
 import com.chelomin.wallaby.Wallaby
 import com.chelomin.wallaby.api.Api
 import com.chelomin.wallaby.api.ApiHelper
@@ -29,17 +30,23 @@ class ProductListVm : ViewModel() {
     // it this way just to my taste
     val pagesInProgress: MutableLiveData<Set<Int?>> by lazy {
         loadDataIfNeeded()
-        MutableLiveData<Set<Int?>>()
+        var ld: MutableLiveData<Set<Int?>> = MutableLiveData()
+        ld.value = HashSet()
+        ld
     }
 
     val pagesCompleted: MutableLiveData<Set<Int?>> by lazy {
         loadDataIfNeeded()
-        MutableLiveData<Set<Int?>>()
+        var ld: MutableLiveData<Set<Int?>> = MutableLiveData()
+        ld.value = HashSet()
+        ld
     }
 
     val totalItems: MutableLiveData<Int> by lazy {
         loadDataIfNeeded()
-        MutableLiveData<Int>()
+        var ld: MutableLiveData<Int> = MutableLiveData()
+        ld.value = 0
+        ld
     }
 
     private val apiHelper: ApiHelper by lazy {
@@ -59,12 +66,14 @@ class ProductListVm : ViewModel() {
                 Db::class.java, "cache").build()
     }
 
-    private var firstGet = true
+    private val handler: Handler = Handler()
+
+    private var firstGet: Boolean = true
 
     private fun loadDataIfNeeded() {
         if (firstGet) {
             firstGet = false
-            loadData()
+            handler.post({loadData()})
         }
     }
 
@@ -74,7 +83,7 @@ class ProductListVm : ViewModel() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<ProductListDto> {
                     override fun onSubscribe(d: Disposable) {
-                        pagesInProgress.value = pagesInProgress.value?.plus(pageNumber)
+                        pagesInProgress.value = pagesInProgress.value!!.plus(pageNumber)
                     }
 
                     override fun onNext(productListDto: ProductListDto) {
@@ -82,7 +91,7 @@ class ProductListVm : ViewModel() {
                     }
 
                     override fun onError(e: Throwable) {
-                        pagesInProgress.value = pagesInProgress.value?.minus(pageNumber)
+                        pagesInProgress.value = pagesInProgress.value!!.minus(pageNumber)
                     }
 
                     override fun onComplete() {
@@ -136,9 +145,6 @@ class ProductListVm : ViewModel() {
     }
 
     companion object {
-
-        fun getPageForIndex(index: Int): Int {
-            return index / C.PRODUCTS_PER_PAGE + 1
-        }
+        fun getPageForIndex(index: Int): Int = index / C.PRODUCTS_PER_PAGE + 1
     }
 }
