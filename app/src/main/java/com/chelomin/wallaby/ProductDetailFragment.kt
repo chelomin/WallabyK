@@ -17,12 +17,12 @@ import com.chelomin.wallaby.room.Db
 import com.chelomin.wallaby.room.ProductEntity
 import com.squareup.picasso.Picasso
 
-import butterknife.BindView
-import butterknife.ButterKnife
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+
+import kotlinx.android.synthetic.main.product_detail.*
 
 /**
  * A fragment representing a single ProductDto detail screen.
@@ -49,9 +49,6 @@ class ProductDetailFragment : Fragment() {
                 Db::class.java, "cache").build()
     }
 
-    @BindView(R.id.product_detail) internal var productDetail: TextView? = null
-    @BindView(R.id.image) internal var image: ImageView? = null
-
     private var price: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +67,6 @@ class ProductDetailFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.product_detail, container, false)
 
-        ButterKnife.bind(this, rootView)
         db.productsDao().loadByIndex(index!!)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -88,7 +84,7 @@ class ProductDetailFragment : Fragment() {
                         if (price != null) {
                             price!!.text = productEntity.price
                         }
-                        productDetail!!.text = Html.fromHtml(item!!.longDescription)
+                        product_detail.text = Html.fromHtml(item!!.longDescription)
 
                         Picasso.with(activity).load(item!!.productImage).into(image)
                     }

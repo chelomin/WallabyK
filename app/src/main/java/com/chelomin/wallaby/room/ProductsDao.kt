@@ -17,7 +17,7 @@ interface ProductsDao {
     @get:Query("SELECT * FROM products")
     val all: List<ProductEntity>
 
-    @Query("SELECT * FROM products WHERE indx = (:index) LIMIT 1")
+    @Query("SELECT * FROM products WHERE indx = :arg0 LIMIT 1")
     fun loadByIndex(index: Int): Single<ProductEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

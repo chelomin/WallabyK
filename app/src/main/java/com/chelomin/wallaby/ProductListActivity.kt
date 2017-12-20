@@ -15,8 +15,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.chelomin.wallaby.config.C
 import com.chelomin.wallaby.room.ProductEntity
 import com.chelomin.wallaby.viewmodel.ProductListVm
@@ -26,6 +24,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.Executors
+
+import kotlinx.android.synthetic.main.activity_product_list.*
 
 /**
  * An activity representing a list of Products. This activity
@@ -46,20 +46,9 @@ class ProductListActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ProductsItemRecyclerViewAdapter
 
-    @BindView(R.id.debug)
-    lateinit var debugView: View
-
-    @BindView(R.id.in_progress)
-    lateinit var inProgressTv: TextView
-
-    @BindView(R.id.completed)
-    lateinit var completedTv: TextView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
-
-        ButterKnife.bind(this)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -88,7 +77,7 @@ class ProductListActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.product_list)
         setupRecyclerView(recyclerView)
 
-        debugView.visibility = if (C.SHOW_DEBUG_INFO) View.VISIBLE else View.GONE
+        debug.visibility = if (C.SHOW_DEBUG_INFO) View.VISIBLE else View.GONE
     }
 
     private fun updateTotalItems(totalItems: Int) {
@@ -97,11 +86,11 @@ class ProductListActivity : AppCompatActivity() {
 
     private fun updatePagesLoaded(pages: Set<Int?>?) {
         recyclerView.adapter.notifyDataSetChanged()
-        completedTv.text = "Pages completed: " + pages?.toString()
+        completed.text = "Pages completed: " + pages?.toString()
     }
 
     private fun updatePagesInProgress(pages: Set<Int?>?) {
-        inProgressTv.text = "Pages loading: " + pages?.toString()
+        in_progress.text = "Pages loading: " + pages?.toString()
     }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
@@ -191,20 +180,11 @@ class ProductListActivity : AppCompatActivity() {
         }
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            @BindView(R.id.name)
-            lateinit var name: TextView
-            @BindView(R.id.price)
-            lateinit var price: TextView
-            @BindView(R.id.thumbnail)
-            lateinit var icon: ImageView
-            @BindView(R.id.loading_pb)
-            lateinit var loading: ProgressBar
-            @BindView(R.id.loading_bg)
-            lateinit var loadingBg: ImageView
-
-            init {
-                ButterKnife.bind(this, view)
-            }
+            var name: TextView = view.findViewById(R.id.name)
+            var price: TextView = view.findViewById(R.id.price)
+            var icon: ImageView = view.findViewById(R.id.thumbnail)
+            var loading: ProgressBar = view.findViewById(R.id.loading_pb)
+            var loadingBg: ImageView = view.findViewById(R.id.loading_bg)
         }
 
         companion object {
