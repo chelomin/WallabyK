@@ -79,7 +79,7 @@ class ProductDetailFragment : Fragment() {
                         toolbarLayout?.title = productEntity.productName
                         price?.text = productEntity.price
 
-                        product_detail.text = Html.fromHtml(productEntity.longDescription)
+                        product_detail_tv.text = Html.fromHtml(productEntity.longDescription)
 
                         Picasso.with(activity).load(productEntity.productImage).into(image)
                     }
