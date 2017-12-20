@@ -86,11 +86,11 @@ class ProductListActivity : AppCompatActivity() {
 
     private fun updatePagesLoaded(pages: Set<Int?>?) {
         recyclerView.adapter.notifyDataSetChanged()
-        completed.text = "Pages completed: " + pages?.toString()
+        completed.text = "Pages completed: ${pages?.toString()}"
     }
 
     private fun updatePagesInProgress(pages: Set<Int?>?) {
-        in_progress.text = "Pages loading: " + pages?.toString()
+        in_progress.text = "Pages loading: ${pages?.toString()}"
     }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {

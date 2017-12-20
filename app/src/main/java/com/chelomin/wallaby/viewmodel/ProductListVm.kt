@@ -3,7 +3,6 @@ package com.chelomin.wallaby.viewmodel
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.arch.persistence.room.Room
-import android.os.AsyncTask
 import android.os.Handler
 import com.chelomin.wallaby.Wallaby
 import com.chelomin.wallaby.api.Api
@@ -20,6 +19,7 @@ import io.reactivex.schedulers.Schedulers
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.concurrent.thread
 
 /**
  * Created by huge on 12/8/17.
@@ -73,7 +73,7 @@ class ProductListVm : ViewModel() {
     private fun loadDataIfNeeded() {
         if (firstGet) {
             firstGet = false
-            handler.post({loadData()})
+            handler.post({ loadData() })
         }
     }
 
@@ -102,21 +102,14 @@ class ProductListVm : ViewModel() {
     }
 
     private fun cachePageData(productListDto: ProductListDto) {
-        // TODO instead of spawning a new thread here it could be better to apply some RxJava
-        // mastery above. Will do if have time
-        // TODO understand what's wrong with static leak
-        object : AsyncTask<ProductListDto, Void, ProductListDto>() {
-            override fun doInBackground(vararg productListDto: ProductListDto): ProductListDto {
-                cachePageDataSync(productListDto[0])
-                return productListDto[0]
-            }
-
-            override fun onPostExecute(productListDto: ProductListDto) {
+        thread {
+            cachePageDataSync(productListDto)
+            handler.post({
                 pagesInProgress.value = pagesInProgress.value!!.minus(productListDto.pageNumber)
                 pagesCompleted.value = pagesCompleted.value!!.plus(productListDto.pageNumber)
                 totalItems.value = productListDto.totalProducts
-            }
-        }.execute(productListDto, null, productListDto)
+            })
+        }
     }
 
     private fun cachePageDataSync(productListDto: ProductListDto) {
@@ -131,9 +124,14 @@ class ProductListVm : ViewModel() {
         db.productsDao().insertAll(entities)
     }
 
+    /**
+     * returns a product if it's already cached in db, otherwise returns null and:
+     * either requests it from the backend
+     * or does nothing if already requested
+     */
     fun getProduct(index: Int): Single<ProductEntity>? {
         val page = getPageForIndex(index)
-        // Do nothing: page is already loading. client will be updated once done
+
         return if (pagesInProgress.value!!.contains(page)) null else {
             if (pagesCompleted.value!!.contains(page)) {
                 db.productsDao().loadByIndex(index)
